@@ -20,10 +20,14 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Configuração da IA
+# Configuração da IA (Corrigido para google-generativeai)
 api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
-    print("ALERTA: GEMINI_API_KEY não encontrada no arquivo .env")
-client = genai.Client(api_key=api_key)
+    print("ALERTA: GEMINI_API_KEY não encontrada")
+
+# Forma correta de configurar o SDK clássico
+genai.configure(api_key=api_key)
+# Não usamos mais 'client = genai.Client'
 
 # --- CONFIGURAÇÃO DO BANCO DE DADOS ---
 def get_db_connection():

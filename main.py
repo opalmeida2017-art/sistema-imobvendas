@@ -6,7 +6,7 @@ from datetime import datetime, date
 from psycopg2.extras import RealDictCursor
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
-from google import genai
+import google.generativeai as genai
 from decimal import Decimal
 from werkzeug.utils import secure_filename
 

@@ -1,0 +1,52 @@
+<div id="telaLogin" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-login">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="fecharLoginSeClicarFora(event)"></div>
+    
+    <div class="relative w-full max-w-md p-8 rounded-3xl shadow-2xl glass-effect fade-in mx-4">
+        <button onclick="fecharTelaLogin()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 font-bold">✕</button>
+        
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-green-800 italic mb-2">AgroVendas</h1>
+            <p class="text-gray-600 font-medium">Acesso Restrito ao Corretor</p>
+        </div>
+
+        <div id="formLogin">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 ml-1">E-mail</label>
+                    <input type="email" id="login_email" class="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-green-600 outline-none" placeholder="admin@agrovendas.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 ml-1">Senha</label>
+                    <input type="password" id="login_senha" class="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-green-600 outline-none" placeholder="••••••••">
+                </div>
+                <button onclick="fazerLogin()" class="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-3 rounded-xl transition shadow-lg transform active:scale-[0.98]">
+                    ENTRAR
+                </button>
+            </div>
+            <div class="mt-6 flex justify-between text-sm font-bold text-gray-500">
+                <button onclick="mostrarCadastro()" class="hover:text-green-700">Criar Conta</button>
+                <button onclick="mostrarRecuperar()" class="hover:text-green-700">Esqueci a Senha</button>
+            </div>
+        </div>
+
+        <div id="formCadastro" class="hidden">
+            <h3 class="text-xl font-bold text-green-800 mb-4 text-center">Novo Corretor</h3>
+            <div class="space-y-4">
+                <input type="email" id="cad_email" class="w-full p-3 rounded-xl border-2 border-gray-200 outline-none" placeholder="E-mail">
+                <input type="password" id="cad_senha" class="w-full p-3 rounded-xl border-2 border-gray-200 outline-none" placeholder="Senha">
+                <button onclick="fazerCadastro()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg">CADASTRAR</button>
+                <button onclick="mostrarLogin()" class="w-full text-gray-500 font-bold py-2">Voltar</button>
+            </div>
+        </div>
+
+        <div id="formRecuperar" class="hidden">
+            <h3 class="text-xl font-bold text-green-800 mb-2 text-center">Recuperar Acesso</h3>
+            <p class="text-sm text-gray-500 mb-4 text-center">Digite seu e-mail para redefinir a senha.</p>
+            <div class="space-y-4">
+                <input type="email" id="rec_email" class="w-full p-3 rounded-xl border-2 border-gray-200 outline-none" placeholder="E-mail cadastrado">
+                <button onclick="fazerRecuperacao()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl shadow-lg">ENVIAR LINK</button>
+                <button onclick="mostrarLogin()" class="w-full text-gray-500 font-bold py-2">Voltar</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,58 @@
+<div id="modalCadastro" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-2 md:p-4 backdrop-blur-sm transition-opacity duration-300">
+    <div class="bg-white rounded-2xl max-w-4xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[95vh] relative">
+        <button onclick="fecharModal()" class="absolute top-4 right-4 bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 rounded-full w-8 h-8 flex items-center justify-center font-bold z-10 transition">✕</button>
+
+        <div class="overflow-y-auto p-6 md:p-8 custom-scrollbar">
+            <div id="etapa1">
+                <h2 class="text-2xl font-bold text-green-800 mb-6 border-b pb-4">1. Detalhes Técnicos</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="col-span-2"><label class="text-xs font-bold text-gray-500 uppercase">Título</label><input id="f_titulo" type="text" class="w-full border-2 p-3 rounded-lg focus:border-green-600 outline-none"></div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Operação</label><select id="f_operacao" class="w-full border-2 p-3 rounded-lg bg-white"><option>Venda</option><option>Aluguel</option></select></div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">País</label><input id="f_pais" type="text" value="Brasil" class="w-full border-2 p-3 rounded-lg"></div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Cidade/UF</label><input id="f_cidade_estado" type="text" class="w-full border-2 p-3 rounded-lg"></div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Preço/Ha</label><input id="f_preco_hectare" type="number" class="w-full border-2 p-3 rounded-lg"></div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Área Total</label><input id="f_area" type="number" class="w-full border-2 p-3 rounded-lg"></div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Aptidão</label><input id="f_aptidao" type="text" class="w-full border-2 p-3 rounded-lg"></div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Serviços</label><input id="f_servicos" type="text" class="w-full border-2 p-3 rounded-lg"></div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Vendedor</label><input id="f_vendedor" type="text" value="Imobiliária" class="w-full border-2 p-3 rounded-lg"></div>
+                </div>
+                <div class="mt-8 flex justify-end gap-4 border-t pt-6">
+                    <button onclick="fecharModal()" class="px-6 py-2 text-gray-500 font-bold hover:bg-gray-100 rounded-lg">Cancelar</button>
+                    <button onclick="proximaEtapa()" class="bg-green-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-green-800">Próxima Etapa →</button>
+                </div>
+            </div>
+
+            <div id="etapa2" class="hidden">
+                <h2 class="text-2xl font-bold text-green-800 mb-6 border-b pb-4">2. Memorial & IA</h2>
+                <div class="space-y-4">
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Descrição</label><textarea id="f_desc" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500"></textarea></div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Solo</label><textarea id="f_solo" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500"></textarea></div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Hídrico</label><textarea id="f_hidrico" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500"></textarea></div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Infra</label><textarea id="f_infra" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500"></textarea></div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Logística</label><textarea id="f_log" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500"></textarea></div>
+                    <div><label class="text-xs font-bold text-gray-500 uppercase">Doc/Valor</label><textarea id="f_doc" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500"></textarea></div>
+                    
+                    <div class="bg-blue-50 p-4 rounded-xl border-2 border-dashed border-blue-200 flex flex-col gap-2">
+                        <label class="text-xs font-bold text-blue-700 uppercase">Imagem Capa</label>
+                        <div class="flex gap-2">
+                            <input id="f_foto" type="text" class="flex-1 p-3 rounded-lg border outline-none text-gray-600 bg-white" placeholder="Selecione uma foto..." readonly>
+                            
+                            <input type="file" id="inputArquivoEscondido" class="hidden" accept="image/*" onchange="fazerUploadImagem()">
+                            
+                            <button onclick="document.getElementById('inputArquivoEscondido').click()" class="bg-blue-600 text-white px-4 rounded-lg font-bold hover:bg-blue-700 transition flex items-center gap-2">
+                                📂 Selecionar Foto
+                            </button>
+                        </div>
+                    </div>
+                <div class="mt-8 flex flex-col gap-3 pt-4 border-t">
+                    <button onclick="melhorarComIA()" id="btnIA" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-xl font-bold shadow-lg hover:scale-[1.01] transition">✨ IA Refinar Tudo</button>
+                    <div class="flex gap-3 mt-2">
+                        <button onclick="voltarEtapa()" class="flex-1 bg-white border-2 py-3 rounded-xl font-bold text-gray-600">Voltar</button>
+                        <button onclick="limparFormulario()" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold">Limpar</button>
+                        <button onclick="salvarTudo()" class="flex-[2] bg-green-700 text-white py-3 rounded-xl font-bold shadow-lg">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

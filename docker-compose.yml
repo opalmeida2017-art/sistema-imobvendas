@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: imobiliaria_rural
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    ports:
+      - "8000:80"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:admin@db:5432/imobiliaria_rural
+      GEMINI_API_KEY: AIzaSyCZzxsmgNBf0Bnz3giSRNseXsfGBHnb-fA

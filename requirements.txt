@@ -1,6 +1,8 @@
-Plaintext
-fastapi
-uvicorn
+
+flask
+gunicorn
 psycopg2-binary
 google-generativeai
 python-dotenv
+requests
+werkzeug

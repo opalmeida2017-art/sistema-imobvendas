@@ -483,38 +483,8 @@ def salvar_config():
         return jsonify({"status": "sucesso"})
     except Exception as e: return jsonify({"status": "erro", "detalhe": str(e)})
     finally: conn.close()
-    
-# --- ROTA TEMPORÁRIA PARA CRIAR ADMIN ---
-@app.route('/criar-admin-agora')
-def criar_admin_secreto():
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        
-        # Defina aqui seu usuário e senha
-        email = "edson.fazendasmt@gmail.com"
-        senha_plana = "123" 
-        
-        email = "op.almeida@hotmail.com"
-        senha_plana = "123"
-        
-        # Criptografa a senha usando a função que já existe no seu código
-        senha_criptografada = hash_senha(senha_plana)
-        
-        # Tenta inserir (se já existir, avisa)
-        cur.execute("SELECT * FROM usuarios WHERE email = %s", (email,))
-        if cur.fetchone():
-            return "O usuário admin@agrovendas.com JÁ EXISTE no banco!"
-            
-        cur.execute("INSERT INTO usuarios (email, senha_hash) VALUES (%s, %s)", (email, senha_criptografada))
-        conn.commit()
-        conn.close()
-        
-        return f"✅ SUCESSO! Usuário criado.<br>Email: {email}<br>Senha: {senha_plana}"
-    except Exception as e:
-        return f"Erro: {str(e)}"
-    
-setup_database()
+
+setup_database() 
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

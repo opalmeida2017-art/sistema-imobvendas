@@ -4,9 +4,10 @@ services:
   db:
     image: postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: imobiliaria_rural
+      # O formato ${VARIAVEL} diz ao Docker: "Pegue isso do arquivo .env"
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
 
@@ -17,5 +18,6 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgresql://postgres:admin@db:5432/imobiliaria_rural
-      GEMINI_API_KEY: AIzaSyCZzxsmgNBf0Bnz3giSRNseXsfGBHnb-fA
+      # Aqui também usamos a variável, sem expor a senha real
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}

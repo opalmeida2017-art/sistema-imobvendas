@@ -478,6 +478,29 @@ def salvar_configuracao_api():
     conn.close()
     return jsonify({"status": "sucesso"})
 
+@app.route('/api/upload/logo', methods=['POST'])
+def upload_logo():
+    if 'file' not in request.files:
+        return jsonify({"erro": "Nenhum arquivo enviado"}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"erro": "Nome de arquivo vazio"}), 400
+
+    # Cria a pasta no Disco se ela ainda não existir (Importante para discos novos!)
+    pasta_uploads = os.path.join(os.getcwd(), 'static', 'uploads')
+    if not os.path.exists(pasta_uploads):
+        os.makedirs(pasta_uploads)
+        
+    # Salva com um nome padrão para não encher o disco
+    nome_arquivo = f"logo_site_{file.filename}"
+    caminho_completo = os.path.join(pasta_uploads, nome_arquivo)
+    file.save(caminho_completo)
+    
+    # Retorna o link público para o Javascript
+    url_publica = f"/static/uploads/{nome_arquivo}"
+    return jsonify({"url": url_publica})
+
 setup_database() 
 
 if __name__ == '__main__':

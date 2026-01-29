@@ -536,3 +536,39 @@
             btn.disabled = false;
         }
     }
+
+async function fazerUploadLogo() {
+    const input = document.getElementById('inputLogoUpload');
+    const preview = document.getElementById('previewLogo');
+    const inputOculto = document.getElementById('conf_url_logo');
+    
+    if (input.files && input.files[0]) {
+        const arquivo = input.files[0];
+        const formData = new FormData();
+        formData.append('file', arquivo);
+        
+        // Mostra que está carregando
+        preview.classList.remove('hidden');
+        preview.style.opacity = '0.5';
+
+        try {
+            const res = await fetch('/api/upload/logo', {
+                method: 'POST',
+                body: formData
+            });
+            const json = await res.json();
+            
+            if (json.url) {
+                // Sucesso: Atualiza a foto na tela e prepara para salvar
+                preview.src = json.url;
+                preview.style.opacity = '1';
+                inputOculto.value = json.url; // Guarda o link novo para quando clicar em "Salvar"
+            } else {
+                alert('Erro ao enviar imagem');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Erro na conexão com o servidor');
+        }
+    }
+}

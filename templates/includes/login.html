@@ -2,30 +2,37 @@
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="fecharLoginSeClicarFora(event)"></div>
     
     <div class="relative w-full max-w-md p-8 rounded-3xl shadow-2xl glass-effect fade-in mx-4">
-        <button onclick="fecharTelaLogin()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 font-bold">✕</button>
+        <button onclick="fecharTelaLogin()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 font-bold text-xl">✕</button>
         
         <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-green-800 italic mb-2">AgroVendas</h1>
-            <p class="text-gray-600 font-medium">Acesso Restrito ao Corretor</p>
+            {% if config.url_logo %}
+                <img src="{{ config.url_logo }}" class="h-20 w-auto mx-auto mb-4 object-contain drop-shadow-md">
+            {% else %}
+                <div class="text-6xl mb-4">🌾</div>
+            {% endif %}
+
+            <h1 class="text-3xl font-bold text-white italic mb-2 font-serif">{{ config.nome_site }}</h1>
+            
+            <p class="text-gray-600 font-medium text-sm">Painel Administrativo do Corretor</p>
         </div>
 
         <div id="formLogin">
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 ml-1">E-mail</label>
-                    <input type="email" id="login_email" class="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-green-600 outline-none" placeholder="admin@agrovendas.com">
+                    <label class="block text-xs font-bold text-gray-500 uppercase ml-1 mb-1">E-mail Profissional</label>
+                    <input type="email" id="login_email" class="w-full p-4 rounded-xl border-2 border-gray-200 focus:border-green-600 outline-none bg-gray-50 focus:bg-white transition" placeholder="admin@exemplo.com">
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 ml-1">Senha</label>
-                    <input type="password" id="login_senha" class="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-green-600 outline-none" placeholder="••••••••">
+                    <label class="block text-xs font-bold text-gray-500 uppercase ml-1 mb-1">Senha de Acesso</label>
+                    <input type="password" id="login_senha" class="w-full p-4 rounded-xl border-2 border-gray-200 focus:border-green-600 outline-none bg-gray-50 focus:bg-white transition" placeholder="••••••••">
                 </div>
-                <button onclick="fazerLogin()" class="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-3 rounded-xl transition shadow-lg transform active:scale-[0.98]">
-                    ENTRAR
+                <button onclick="fazerLogin()" class="w-full bg-[#D27D63] hover:bg-[#b86b54] text-white font-bold py-4 rounded-xl transition shadow-lg transform active:scale-[0.98] mt-4">
+                    ACESSAR SISTEMA
                 </button>
             </div>
-            <div class="mt-6 flex justify-between text-sm font-bold text-gray-500">
-                <button onclick="mostrarCadastro()" class="hover:text-green-700">Criar Conta</button>
-                <button onclick="mostrarRecuperar()" class="hover:text-green-700">Esqueci a Senha</button>
+            <div class="mt-6 flex justify-between text-sm font-bold text-gray-400">
+                <button onclick="mostrarCadastro()" class="hover:text-green-700 transition">Criar Conta</button>
+                <button onclick="mostrarRecuperar()" class="hover:text-green-700 transition">Esqueci a Senha</button>
             </div>
         </div>
 

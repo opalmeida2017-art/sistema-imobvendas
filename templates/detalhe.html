@@ -1,250 +1,258 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ imovel.titulo }} - {{ config.nome_site }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #f9fafb; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #15803d; border-radius: 4px; }
-        
-        /* Animação suave para o Lightbox */
-        .lightbox-fade { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    </style>
-</head>
-<body>
+{% extends 'base.html' %}
 
-    <nav class="bg-green-900 text-white p-4 shadow-md">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="/" class="text-2xl font-bold italic flex items-center gap-2">
-                {% if config.url_logo %}
-                    <img src="{{ config.url_logo }}" class="w-8 h-8 object-contain bg-white/20 rounded p-1">
+{% block title %}{{ imovel.titulo }} - Detalhes{% endblock %}
+
+{% block content %}
+
+<div id="modalFotoGrande" class="hidden fixed inset-0 bg-black z-[9999] flex items-center justify-center transition-opacity duration-300 opacity-0" onclick="fecharFotoGrande(event)">
+    
+    <button onclick="fecharFotoGrande(event)" class="fixed top-6 right-6 text-white bg-black/60 hover:bg-red-600 rounded-full p-3 transition z-[10001] cursor-pointer border border-white/30 backdrop-blur-md shadow-xl">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    </button>
+
+    <button onclick="mudarFotoGrande(event, -1)" class="fixed left-4 top-1/2 -translate-y-1/2 text-white bg-black/60 hover:bg-white hover:text-black rounded-full p-4 transition z-[10001] cursor-pointer border border-white/20 backdrop-blur-md shadow-xl">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+    </button>
+
+    <button onclick="mudarFotoGrande(event, 1)" class="fixed right-4 top-1/2 -translate-y-1/2 text-white bg-black/60 hover:bg-white hover:text-black rounded-full p-4 transition z-[10001] cursor-pointer border border-white/20 backdrop-blur-md shadow-xl">
+         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+    </button>
+
+    <img id="imgGrandeFull" src="" class="max-h-screen max-w-screen object-contain transition-transform duration-300 scale-95 relative z-[10000]" onclick="event.stopPropagation()">
+</div>
+
+<div class="fade-in max-w-7xl mx-auto pb-12 relative z-0">
+    
+    <a href="/" class="inline-flex items-center gap-2 text-gray-500 hover:text-green-700 font-bold mb-6 transition group mt-4">
+        <span class="group-hover:-translate-x-1 transition">←</span> Voltar para Lista
+    </a>
+
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 border-b border-gray-200 pb-6">
+        <div>
+            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider mb-2 inline-block">
+                {{ imovel.tipo }}
+            </span>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">{{ imovel.titulo }}</h1>
+            <p class="text-gray-500 flex items-center gap-2 mt-2 font-medium">
+                📍 {{ imovel.cidade }} {% if imovel.estado %}- {{ imovel.estado }}{% endif %}
+            </p>
+        </div>
+        <div class="text-right">
+            <p class="text-xs text-gray-400 font-bold uppercase mb-1">Valor de Investimento</p>
+            <div class="text-4xl font-black text-green-700 tracking-tight">
+                {% if imovel.status == 'vendido' %}
+                    <span class="text-red-500">VENDIDO</span>
                 {% else %}
-                    <span>🌾</span>
-                {% endif %}
-                {{ config.nome_site }}
-            </a>
-            <a href="/" class="text-sm hover:underline font-bold">← Voltar para Lista</a>
-        </div>
-    </nav>
-
-    <main class="container mx-auto p-4 md:py-8 max-w-6xl">
-        
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-8">
-            <div class="grid grid-cols-1 lg:grid-cols-3">
-                
-                <div class="lg:col-span-2 p-4 flex gap-4 h-[500px]">
-                    <div class="flex flex-col gap-2 overflow-y-auto custom-scrollbar w-24 h-full shrink-0">
-                        {% for foto in fotos %}
-                        <img src="{{ foto }}" onclick="mudarFotoPrincipal({{ loop.index0 }})" 
-                             class="w-full h-20 object-cover rounded cursor-pointer border-2 border-transparent hover:border-green-600 transition opacity-80 hover:opacity-100 bg-gray-100">
-                        {% endfor %}
-                    </div>
-                    
-                    <div class="flex-1 relative bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200 group">
-                        <img id="imgPrincipal" src="{{ fotos[0] if fotos else '' }}" 
-                             class="w-full h-full object-contain cursor-zoom-in transition duration-300"
-                             onclick="abrirLightbox()">
-                        
-                        <div class="absolute bottom-4 right-4 bg-black/50 text-white text-xs px-3 py-1 rounded-full pointer-events-none">
-                            Clique para ampliar 🔍
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-6 border-l border-gray-100 flex flex-col justify-between bg-white">
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-800 mb-2 leading-tight">{{ imovel.titulo }}</h1>
-                        <div class="flex items-center gap-2 text-gray-600 mb-6 text-sm">
-                            <span>📍</span> {{ imovel.cidade }} - {{ imovel.estado }}
-                        </div>
-                        
-                        <div class="mb-6 p-4 bg-green-50 rounded-xl border border-green-100">
-                            <p class="text-sm text-green-800 font-bold uppercase mb-1">Valor do Investimento</p>
-                            <p class="text-3xl font-black text-green-700">
-                                {% if imovel.preco and imovel.preco > 0 %}
-                                    R$ {{ "{:,.2f}".format(imovel.preco|float).replace(",", "X").replace(".", ",").replace("X", ".") }}
-                                {% else %}
-                                    Sob Consulta
-                                {% endif %}
-                            </p>
-                            
-                            {% if imovel.area and imovel.area > 0 and imovel.preco and imovel.preco > 0 %}
-                            <p class="text-sm text-gray-500 mt-1">
-                                (R$ {{ "{:,.2f}".format((imovel.preco|float) / (imovel.area|float)).replace(",", "X").replace(".", ",").replace("X", ".") }} / {{ imovel.tipo_medida if imovel.tipo_medida else 'Unidade' }})
-                            </p>
-                            {% endif %}
-                        </div>
-
-                        <div class="flex flex-col gap-3 mb-6">
-                            <a href="https://wa.me/?text=Olá, tenho interesse no imóvel: {{ imovel.titulo }} (ID: {{ imovel.id }})" target="_blank" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-lg">
-                                💬 Negociar no WhatsApp
-                            </a>
-                        </div>
-
-                        <h3 class="font-bold text-gray-700 mb-3 border-b pb-1">Ficha Técnica</h3>
-                        <div class="text-sm space-y-2">
-                            <div class="flex justify-between border-b border-gray-100 pb-1">
-                                <span class="text-gray-500">Operação</span>
-                                <span class="font-bold text-gray-800">{{ imovel.operacao }}</span>
-                            </div>
-                            <div class="flex justify-between border-b border-gray-100 pb-1">
-                                <span class="text-gray-500">Tipo</span>
-                                <span class="font-bold text-gray-800">{{ imovel.tipo if imovel.tipo else 'Não informado' }}</span>
-                            </div>
-                            <div class="flex justify-between border-b border-gray-100 pb-1">
-                                <span class="text-gray-500">Área Total</span>
-                                <span class="font-bold text-gray-800">{{ imovel.area }} {{ imovel.tipo_medida if imovel.tipo_medida else '' }}</span>
-                            </div>
-                            <div class="flex justify-between border-b border-gray-100 pb-1">
-                                <span class="text-gray-500">Aptidão</span>
-                                <span class="font-bold text-gray-800">{{ imovel.aptidao }}</span>
-                            </div>
-                            <div class="flex justify-between border-b border-gray-100 pb-1">
-                                <span class="text-gray-500">Vendedor</span>
-                                <span class="font-bold text-blue-600">{{ imovel.vendedor }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-6 pt-4 border-t text-xs text-gray-400 text-center">
-                        Código do Imóvel: #{{ imovel.id }}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="md:col-span-2 space-y-6">
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4 border-l-4 border-green-600 pl-3">Descrição Completa</h2>
-                    <p class="whitespace-pre-line text-gray-700 leading-relaxed">{{ imovel.descricao }}</p>
-                </div>
-                {% if imovel.solo_pastagem %}
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h3 class="font-bold text-lg text-green-800 mb-2 flex items-center gap-2">🌱 Solo e Pastagem</h3>
-                    <p class="whitespace-pre-line text-gray-600">{{ imovel.solo_pastagem }}</p>
-                </div>
-                {% endif %}
-                {% if imovel.infraestrutura %}
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h3 class="font-bold text-lg text-blue-800 mb-2 flex items-center gap-2">🏗️ Infraestrutura</h3>
-                    <p class="whitespace-pre-line text-gray-600">{{ imovel.infraestrutura }}</p>
-                </div>
+                    R$ {{ "{:,.0f}".format(imovel.preco|float).replace(",", ".") }}
                 {% endif %}
             </div>
-            <div class="space-y-6">
-                {% if imovel.recursos_hidricos %}
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h3 class="font-bold text-lg text-cyan-700 mb-2 flex items-center gap-2">💧 Recursos Hídricos</h3>
-                    <p class="whitespace-pre-line text-gray-600 text-sm">{{ imovel.recursos_hidricos }}</p>
-                </div>
-                {% endif %}
-                {% if imovel.logistica %}
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h3 class="font-bold text-lg text-orange-700 mb-2 flex items-center gap-2">🚚 Logística</h3>
-                    <p class="whitespace-pre-line text-gray-600 text-sm">{{ imovel.logistica }}</p>
-                </div>
-                {% endif %}
-                {% if imovel.documentacao %}
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h3 class="font-bold text-lg text-gray-700 mb-2 flex items-center gap-2">📄 Documentação</h3>
-                    <p class="whitespace-pre-line text-gray-600 text-sm">{{ imovel.documentacao }}</p>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </main>
-
-    <footer class="bg-gray-800 text-white text-center p-6 mt-12">
-        <p class="opacity-70">&copy; 2026 {{ config.nome_site }}. Todos os direitos reservados.</p>
-    </footer>
-
-    <div id="lightboxModal" class="hidden fixed inset-0 z-[100] bg-black/95 flex items-center justify-center lightbox-fade">
-        
-        <button onclick="fecharLightbox()" class="absolute top-5 right-5 text-white text-4xl font-bold hover:text-red-500 z-50">✕</button>
-        
-        <button onclick="mudarSlide(-1)" class="absolute left-4 text-white text-6xl hover:text-green-500 transition z-50 select-none">‹</button>
-        
-        <img id="lightboxImg" src="" class="max-w-[90vw] max-h-[90vh] object-contain shadow-2xl rounded-lg">
-        
-        <button onclick="mudarSlide(1)" class="absolute right-4 text-white text-6xl hover:text-green-500 transition z-50 select-none">›</button>
-        
-        <div class="absolute bottom-5 text-white bg-black/50 px-4 py-2 rounded-full font-bold">
-            <span id="lbIndex">1</span> / <span id="lbTotal">1</span>
         </div>
     </div>
 
-    <script>
-        // Transforma a lista de fotos do Python em um Array Javascript
-        const fotosImovel = {{ fotos | tojson }};
-        let indiceAtual = 0;
-
-        // Função para atualizar a foto principal quando clica na miniatura
-        function mudarFotoPrincipal(index) {
-            indiceAtual = index;
-            const main = document.getElementById('imgPrincipal');
-            main.src = fotosImovel[index];
-        }
-
-        // --- LÓGICA DO LIGHTBOX (TELA CHEIA) ---
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        function abrirLightbox() {
-            if (fotosImovel.length === 0) return;
+        <div class="lg:col-span-2 space-y-8">
             
-            const modal = document.getElementById('lightboxModal');
-            const img = document.getElementById('lightboxImg');
-            
-            // Define a imagem atual baseada no índice que estava na tela principal
-            img.src = fotosImovel[indiceAtual];
-            atualizarContador();
-            
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // Bloqueia rolagem da página
-        }
+            <div class="bg-white p-2 rounded-2xl shadow-sm border border-gray-200">
+                <div class="relative h-[450px] w-full bg-gray-100 rounded-xl overflow-hidden group">
+                    <img id="imgDestaque" src="{{ fotos[0] if fotos else 'https://via.placeholder.com/800x400?text=Sem+Foto' }}" 
+                         class="w-full h-full object-contain transition duration-300 cursor-zoom-in"
+                         onclick="abrirFotoGrande()"
+                         title="Clique para ampliar em tela cheia">
 
-        function fecharLightbox() {
-            document.getElementById('lightboxModal').classList.add('hidden');
-            document.body.style.overflow = 'auto'; // Libera rolagem
-        }
+                    <button onclick="mudarFotoDetalhe(event, -1)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg hover:scale-110 transition backdrop-blur-sm z-10 opacity-0 group-hover:opacity-100 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <button onclick="mudarFotoDetalhe(event, 1)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg hover:scale-110 transition backdrop-blur-sm z-10 opacity-0 group-hover:opacity-100 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                    
+                    <div class="absolute bottom-4 right-4 bg-black/60 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition pointer-events-none flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
+                        Ampliar
+                    </div>
+                </div>
 
-        function mudarSlide(direcao) {
-            indiceAtual += direcao;
-            
-            // Loop infinito (se chegar no fim, volta pro começo)
-            if (indiceAtual >= fotosImovel.length) {
-                indiceAtual = 0;
-            } else if (indiceAtual < 0) {
-                indiceAtual = fotosImovel.length - 1;
-            }
-            
-            // Atualiza a imagem do lightbox
-            document.getElementById('lightboxImg').src = fotosImovel[indiceAtual];
-            
-            // Atualiza também a imagem da página principal em background
-            document.getElementById('imgPrincipal').src = fotosImovel[indiceAtual];
-            
-            atualizarContador();
-        }
+                {% if fotos %}
+                <div class="flex gap-2 mt-2 overflow-x-auto custom-scrollbar pb-1 px-1">
+                    {% for foto in fotos %}
+                    <img src="{{ foto }}" onclick="definirFotoDetalhe({{ loop.index0 }})"
+                         class="h-16 w-20 object-cover rounded-md cursor-pointer opacity-60 hover:opacity-100 hover:ring-2 hover:ring-green-500 transition thumbnail-img"
+                         data-index="{{ loop.index0 }}">
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
 
-        function atualizarContador() {
-            document.getElementById('lbIndex').innerText = indiceAtual + 1;
-            document.getElementById('lbTotal').innerText = fotosImovel.length;
-        }
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 border-l-4 border-green-600 pl-4">Descrição Completa</h3>
+                <p class="text-gray-600 leading-relaxed whitespace-pre-line text-lg">{{ imovel.descricao }}</p>
+            </div>
 
-        // --- CONTROLE POR TECLADO ---
-        document.addEventListener('keydown', function(event) {
-            const modal = document.getElementById('lightboxModal');
-            if (!modal.classList.contains('hidden')) {
-                if (event.key === 'ArrowLeft') mudarSlide(-1);
-                if (event.key === 'ArrowRight') mudarSlide(1);
-                if (event.key === 'Escape') fecharLightbox();
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 hover:border-green-300 transition group">
+                    <h4 class="font-bold text-gray-800 mb-3 flex items-center gap-2 group-hover:text-green-700 transition">
+                        <span>🌱</span> Características do Terreno
+                    </h4>
+                    <p class="text-sm text-gray-600 leading-relaxed">{{ imovel.solo_pastagem or 'Não informado.' }}</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 hover:border-blue-300 transition group">
+                    <h4 class="font-bold text-gray-800 mb-3 flex items-center gap-2 group-hover:text-blue-600 transition">
+                        <span>💧</span> Água e Lazer
+                    </h4>
+                    <p class="text-sm text-gray-600 leading-relaxed">{{ imovel.recursos_hidricos or 'Não informado.' }}</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 hover:border-orange-300 transition group">
+                    <h4 class="font-bold text-gray-800 mb-3 flex items-center gap-2 group-hover:text-orange-600 transition">
+                        <span>🏗️</span> Edificações e Benfeitorias
+                    </h4>
+                    <p class="text-sm text-gray-600 leading-relaxed">{{ imovel.infraestrutura or 'Não informado.' }}</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 hover:border-purple-300 transition group">
+                    <h4 class="font-bold text-gray-800 mb-3 flex items-center gap-2 group-hover:text-purple-600 transition">
+                        <span>🛣️</span> Acesso e Localização
+                    </h4>
+                    <p class="text-sm text-gray-600 leading-relaxed">{{ imovel.logistica or 'Não informado.' }}</p>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <h4 class="font-bold text-gray-800 mb-2 flex items-center gap-2">📄 Documentação</h4>
+                <p class="text-sm text-gray-600">{{ imovel.documentacao or 'Não informado.' }}</p>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 sticky top-24">
+                <h3 class="text-lg font-bold text-gray-900 mb-6 border-b pb-2">Ficha Técnica</h3>
+                
+                <ul class="space-y-4 text-sm">
+                    <li class="flex justify-between items-center">
+                        <span class="text-gray-500 font-medium">Área Total</span>
+                        <span class="font-bold text-gray-900 bg-gray-50 px-2 py-1 rounded">{{ imovel.area }} {{ imovel.tipo_medida }}</span>
+                    </li>
+                    <li class="flex justify-between items-center">
+                        <span class="text-gray-500 font-medium">Operação</span>
+                        <span class="font-bold text-green-700 bg-green-50 px-2 py-1 rounded">{{ imovel.operacao }}</span>
+                    </li>
+                    <li class="flex justify-between items-center">
+                        <span class="text-gray-500 font-medium">Tipo</span>
+                        <span class="font-bold text-gray-900">{{ imovel.tipo }}</span>
+                    </li>
+                    <li class="flex justify-between items-center">
+                        <span class="text-gray-500 font-medium">Código</span>
+                        <span class="font-mono text-gray-400">#{{ imovel.id }}</span>
+                    </li>
+                     <li class="flex justify-between items-center pt-2 border-t">
+                        <span class="text-gray-500 font-medium">Vendedor</span>
+                        <span class="font-bold text-blue-900">{{ imovel.vendedor or 'Imobiliária' }}</span>
+                    </li>
+                </ul>
+
+                <a href="https://wa.me/{{ config.telefone }}?text=Olá, tenho interesse no imóvel ID {{ imovel.id }}: {{ imovel.titulo }}" target="_blank" class="block w-full bg-[#25D366] hover:bg-[#128C7E] text-white text-center py-4 rounded-xl font-bold mt-8 transition shadow-md hover:shadow-xl flex items-center justify-center gap-2 transform active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.897.003-6.166 5.018-11.183 11.178-11.183 2.979.002 5.798 1.16 7.904 3.268 2.106 2.108 3.263 4.927 3.265 7.908.002 6.165-5.016 11.182-11.175 11.182-1.928 0-3.824-.492-5.492-1.425l-5.78 1.51zm9.239-12.915c-.156-.255-.572-.395-.91-.219-.153.08-1.744 1.144-1.91 1.272-.259.199-.548.513-.424.839.231.605 1.584 2.919 3.52 4.606 1.936 1.686 4.39 1.64 4.887 1.352.417-.242 1.488-1.295 1.488-1.295.385-.436.082-.94-.337-1.148-1.124-.559-2.222-1.076-2.222-1.076-.474-.226-.957-.042-1.238.318l-.517.653c-.158.201-.52.274-.848.127-.852-.381-2.164-1.472-2.584-2.19z"/></svg>
+                    Negociar no WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const fotosDetalhe = {{ fotos | tojson }};
+    let indexFotoAtual = 0;
+
+    // Move modal para o body ao carregar para corrigir sobreposição da navbar
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('modalFotoGrande');
+        if (modal) {
+            document.body.appendChild(modal);
+        }
+        atualizarVisualizacao();
+    });
+
+    function atualizarVisualizacao() {
+        const img = document.getElementById('imgDestaque');
+        if(!img) return;
+        
+        img.style.opacity = '0.8';
+        setTimeout(() => {
+            img.src = fotosDetalhe[indexFotoAtual];
+            img.style.opacity = '1';
+        }, 100);
+
+        document.querySelectorAll('.thumbnail-img').forEach((thumb, idx) => {
+            if(idx === indexFotoAtual) {
+                thumb.classList.add('ring-2', 'ring-green-500', 'opacity-100');
+                thumb.classList.remove('opacity-60');
+                thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            } else {
+                thumb.classList.remove('ring-2', 'ring-green-500', 'opacity-100');
+                thumb.classList.add('opacity-60');
             }
         });
-    </script>
-</body>
-</html>
+    }
+
+    function mudarFotoDetalhe(event, direcao) {
+        event.stopPropagation();
+        if (!fotosDetalhe || fotosDetalhe.length === 0) return;
+        indexFotoAtual += direcao;
+        if (indexFotoAtual >= fotosDetalhe.length) indexFotoAtual = 0;
+        if (indexFotoAtual < 0) indexFotoAtual = fotosDetalhe.length - 1;
+        atualizarVisualizacao();
+    }
+
+    function definirFotoDetalhe(index) {
+        indexFotoAtual = index;
+        atualizarVisualizacao();
+    }
+    
+    // --- FUNÇÕES DO MODAL ---
+
+    function abrirFotoGrande() {
+        const modal = document.getElementById('modalFotoGrande');
+        const imgFull = document.getElementById('imgGrandeFull');
+        imgFull.src = fotosDetalhe[indexFotoAtual];
+        
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            imgFull.classList.remove('scale-95');
+        }, 10);
+        document.body.style.overflow = 'hidden';
+    }
+
+    function mudarFotoGrande(event, direcao) {
+        event.stopPropagation();
+        if (!fotosDetalhe || fotosDetalhe.length === 0) return;
+        
+        indexFotoAtual += direcao;
+        if (indexFotoAtual >= fotosDetalhe.length) indexFotoAtual = 0;
+        if (indexFotoAtual < 0) indexFotoAtual = fotosDetalhe.length - 1;
+
+        document.getElementById('imgGrandeFull').src = fotosDetalhe[indexFotoAtual];
+        atualizarVisualizacao(); 
+    }
+
+    function fecharFotoGrande(event) {
+        if (event && event.target.id === 'imgGrandeFull') return; // Se clicar na foto, não fecha
+
+        const modal = document.getElementById('modalFotoGrande');
+        const imgFull = document.getElementById('imgGrandeFull');
+        
+        modal.classList.add('opacity-0');
+        imgFull.classList.add('scale-95');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }, 300);
+    }
+</script>
+{% endblock %}

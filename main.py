@@ -19,15 +19,13 @@ UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Configuração da IA
-# Configuração da IA (Corrigido para google-generativeai)
+# --- CONFIGURAÇÃO DA IA (CORRIGIDA) ---
 api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
     print("ALERTA: GEMINI_API_KEY não encontrada")
 
-# Forma correta de configurar o SDK clássico
+# Configura a chave globalmente
 genai.configure(api_key=api_key)
-# Não usamos mais 'client = genai.Client'
 
 # --- CONFIGURAÇÃO DO BANCO DE DADOS ---
 def get_db_connection():
@@ -42,7 +40,7 @@ def setup_database():
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # 1. Tabela Principal (Com campo 'area' genérico)
+        # 1. Tabela Principal
         cur.execute("""
             CREATE TABLE IF NOT EXISTS imoveis (
                 id SERIAL PRIMARY KEY,
@@ -50,7 +48,7 @@ def setup_database():
                 status TEXT DEFAULT 'disponivel', url_foto TEXT, descricao TEXT,
                 solo_pastagem TEXT, recursos_hidricos TEXT, infraestrutura TEXT,
                 logistica TEXT, documentacao TEXT, operacao TEXT, pais TEXT,
-                aptidao TEXT, servicos TEXT, vendedor TEXT, tipo TEXT
+                aptidao TEXT, servicos TEXT, vendedor TEXT, tipo TEXT, tipo_medida TEXT
             )
         """)
         
@@ -77,20 +75,20 @@ def setup_database():
                 url_logo TEXT
             )
         """)
+        # Adicione esta linha para criar a coluna telefone:
+        cur.execute("ALTER TABLE configuracao ADD COLUMN IF NOT EXISTS telefone TEXT;")
         
-        # --- ADICIONE ESTAS 3 LINHAS (GARANTIA DE COLUNAS) ---
+        # GARANTIAS DE COLUNAS
         try:
             cur.execute("ALTER TABLE configuracao ADD COLUMN IF NOT EXISTS nome_site TEXT")
             cur.execute("ALTER TABLE configuracao ADD COLUMN IF NOT EXISTS url_logo TEXT")
+            cur.execute("ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS tipo_medida TEXT") 
             conn.commit()
         except: conn.rollback()
-        # -----------------------------------------------------
 
         cur.execute("SELECT COUNT(*) FROM configuracao")
         if cur.fetchone()[0] == 0:
             cur.execute("INSERT INTO configuracao (nome_site, url_logo) VALUES ('AgroVendas', '')")
-        
-        conn.commit()
         
         cur.execute("CREATE TABLE IF NOT EXISTS usuarios (email TEXT PRIMARY KEY, senha_hash TEXT)")
         
@@ -101,7 +99,7 @@ def setup_database():
         except: conn.rollback()
             
         # Garante colunas novas
-        cols = ["operacao", "pais", "aptidao", "servicos", "vendedor", "tipo", "area", "tipo_medida"]
+        cols = ["operacao", "pais", "aptidao", "servicos", "vendedor", "tipo", "area"]
         for c in cols:
             try:
                 cur.execute(f"ALTER TABLE imoveis ADD COLUMN IF NOT EXISTS {c} TEXT")
@@ -166,15 +164,13 @@ def login_usuario():
         else: return jsonify({"status": "erro", "mensagem": "Incorreto"})
     except Exception as e: return jsonify({"status": "erro", "mensagem": str(e)})
 
-# --- ROTA HOME (ESTA ERA A QUE ESTAVA FALTANDO) ---
+# --- ROTA HOME ---
 @app.route('/')
 def home():
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
-    # Busca Imóveis com ordenação personalizada:
-    # 1. Status 'vendido' vai para o final (1), os outros ficam no topo (0)
-    # 2. Depois ordena por ID decrescente (mais novos primeiro)
+    # 1. Busca os imóveis
     cur.execute("""
         SELECT * FROM imoveis 
         ORDER BY 
@@ -183,15 +179,32 @@ def home():
     """)
     imoveis = cur.fetchall()
     
-    # Busca Configuração
+    # 2. Busca a galeria de fotos para cada imóvel (Para o carrossel funcionar)
+    for imovel in imoveis:
+        cur.execute("SELECT url_foto FROM imoveis_fotos WHERE imovel_id = %s ORDER BY id ASC", (imovel['id'],))
+        fotos_db = cur.fetchall()
+        
+        galeria = []
+        # Adiciona a capa primeiro (se existir)
+        if imovel['url_foto']: 
+            galeria.append(imovel['url_foto'])
+        # Adiciona as outras fotos
+        for f in fotos_db:
+            galeria.append(f['url_foto'])
+            
+        # Se não tiver foto nenhuma, coloca a padrão
+        if not galeria:
+            galeria = ['https://images.unsplash.com/photo-1500382017468-9049fed747ef']
+            
+        imovel['galeria'] = galeria # Envia a lista para o HTML
+
+    # 3. Busca configurações
     cur.execute("SELECT * FROM configuracao LIMIT 1")
     config = cur.fetchone()
-    
     conn.close()
     
-    # Se não tiver config (segurança), cria um dict padrão
     if not config: config = {"nome_site": "AgroVendas", "url_logo": ""}
-        
+    
     return render_template('index.html', imoveis=imoveis, config=config)
 
 @app.route('/imovel/<int:id>')
@@ -199,35 +212,20 @@ def ver_detalhe_imovel(id):
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        
-        # Busca dados do imóvel
         cur.execute("SELECT * FROM imoveis WHERE id = %s", (id,))
         imovel = cur.fetchone()
-        
-        # Busca fotos
         cur.execute("SELECT url_foto FROM imoveis_fotos WHERE imovel_id = %s", (id,))
         fotos_db = cur.fetchall()
-        
-        # Prepara lista de fotos (Capa + Galeria)
         fotos = []
-        if imovel['url_foto']:
-            fotos.append(imovel['url_foto'])
-        for f in fotos_db:
-            fotos.append(f['url_foto'])
-            
-        # Busca configuração (Nome/Logo do site)
+        if imovel['url_foto']: fotos.append(imovel['url_foto'])
+        for f in fotos_db: fotos.append(f['url_foto'])
         cur.execute("SELECT * FROM configuracao LIMIT 1")
         config = cur.fetchone()
         if not config: config = {"nome_site": "AgroVendas", "url_logo": ""}
-
         conn.close()
-        
-        if not imovel:
-            return "Imóvel não encontrado", 404
-
+        if not imovel: return "Imóvel não encontrado", 404
         return render_template('detalhe.html', imovel=imovel, fotos=fotos, config=config)
-    except Exception as e:
-        return f"Erro: {str(e)}"
+    except Exception as e: return f"Erro: {str(e)}"
 
 # --- SALVAR IMÓVEL ---
 @app.route('/api/imovel/salvar', methods=['POST'])
@@ -243,9 +241,7 @@ def salvar_imovel_direto():
 
     try:
         imovel_id = d.get('id')
-        
         if imovel_id:
-            # UPDATE (Adicionado tipo_medida)
             cur.execute("""
                 UPDATE imoveis SET 
                     titulo=%s, preco=%s, area=%s, cidade=%s, estado=%s, 
@@ -258,11 +254,9 @@ def salvar_imovel_direto():
                 d.get('descricao'), d.get('solo_pastagem'), d.get('recursos_hidricos'), d.get('infraestrutura'),
                 d.get('logistica'), d.get('documentacao'), d.get('url_foto'), d.get('operacao'),
                 d.get('pais'), d.get('aptidao'), d.get('servicos'), d.get('vendedor'), d.get('tipo'), 
-                d.get('tipo_medida'), # <--- NOVO
-                imovel_id
+                d.get('tipo_medida'), imovel_id
             ))
         else:
-            # INSERT (Adicionado tipo_medida)
             cur.execute("""
                 INSERT INTO imoveis (
                     titulo, preco, area, cidade, estado, 
@@ -276,7 +270,7 @@ def salvar_imovel_direto():
                 d.get('descricao'), d.get('solo_pastagem'), d.get('recursos_hidricos'), d.get('infraestrutura'),
                 d.get('logistica'), d.get('documentacao'), d.get('url_foto'), d.get('operacao'),
                 d.get('pais'), d.get('aptidao'), d.get('servicos'), d.get('vendedor'), d.get('tipo'), 
-                d.get('tipo_medida') # <--- NOVO
+                d.get('tipo_medida')
             ))
             imovel_id = cur.fetchone()[0]
 
@@ -296,7 +290,7 @@ def salvar_imovel_direto():
         cur.close()
         conn.close()
         
-# --- CHAT IA ---
+# --- CHAT IA (CORRIGIDO) ---
 @app.route('/chat', methods=['POST'])
 def chat():
     dados = request.json
@@ -310,7 +304,10 @@ def chat():
     """
 
     try:
-        response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+        # CORREÇÃO AQUI: Instancia o modelo na hora
+        model = genai.GenerativeModel("gemini-2.0-flash")
+        response = model.generate_content(prompt)
+        
         texto_limpo = response.text.strip().replace('```json', '').replace('```', '')
         dados_ia = json.loads(texto_limpo)
         
@@ -347,7 +344,7 @@ def chat():
 
     except Exception as e: return jsonify({"status": "erro", "detalhe": str(e)})
 
-# --- OUTRAS ROTAS ---
+# --- ROTAS DE GESTÃO ---
 @app.route('/api/imovel/vender/<int:id>', methods=['POST'])
 def vender_direto(id):
     conn = get_db_connection()
@@ -413,11 +410,11 @@ def adicionar_opcao():
     except Exception as e: return jsonify({"status": "erro", "detalhe": str(e)})
     finally: conn.close()
 
+# --- AGENTE MELHORAR TEXTO (CORRIGIDO) ---
 @app.route('/agente/melhorar_texto', methods=['POST'])
 def melhorar_texto():
     dados = request.json
     try:
-        # Pega o título para dar contexto caso os outros campos estejam vazios
         titulo = dados.get('titulo', 'Imóvel Rural')
         
         prompt = f"""
@@ -437,7 +434,7 @@ def melhorar_texto():
         1. Se o campo estiver vazio, CRIE um texto vendedor persuasivo baseando-se no Título "{titulo}".
         2. Se o campo já tiver texto, melhore a gramática e torne-o mais comercial.
         3. Use emojis moderadamente.
-        4. Retorne APENAS um JSON puro, sem crases (```json).
+        4. Retorne APENAS um JSON puro, sem crases.
         
         ESTRUTURA DE RESPOSTA (JSON):
         {{
@@ -450,17 +447,13 @@ def melhorar_texto():
         }}
         """
         
-        # Configuração para garantir JSON (funciona melhor no Gemini 1.5/2.0)
         generation_config = {"response_mime_type": "application/json"}
         
-        response = client.models.generate_content(
-            model="gemini-2.0-flash", 
-            contents=prompt,
-            config=generation_config
-        )
+        # CORREÇÃO AQUI: Instancia o modelo corretamente
+        model = genai.GenerativeModel("gemini-2.0-flash", generation_config=generation_config)
+        response = model.generate_content(prompt)
         
         texto_limpo = response.text.strip()
-        # Remove marcadores de código se a IA teimar em colocar
         if texto_limpo.startswith("```json"):
             texto_limpo = texto_limpo.replace("```json", "").replace("```", "")
             
@@ -468,21 +461,22 @@ def melhorar_texto():
         
     except Exception as e:
         print(f"Erro na IA: {e}")
-        # Retorna o erro para o frontend ver
         return jsonify({"erro": str(e)})
     
 @app.route('/api/config/salvar', methods=['POST'])
-def salvar_config():
-    d = request.json
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        # Atualiza a primeira linha (id=1 ou qualquer que exista)
-        cur.execute("UPDATE configuracao SET nome_site=%s, url_logo=%s", (d.get('nome_site'), d.get('url_logo')))
-        conn.commit()
-        return jsonify({"status": "sucesso"})
-    except Exception as e: return jsonify({"status": "erro", "detalhe": str(e)})
-    finally: conn.close()
+def salvar_configuracao_api():
+    dados = request.json  # <--- ESSA LINHA É OBRIGATÓRIA (define o 'dados')
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    # Executa a atualização no banco
+    cur.execute("UPDATE configuracao SET nome_site = %s, url_logo = %s, telefone = %s WHERE id = (SELECT id FROM configuracao LIMIT 1)", 
+                (dados['nome_site'], dados['url_logo'], dados['telefone']))
+    
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "sucesso"})
 
 setup_database() 
 

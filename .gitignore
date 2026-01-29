@@ -1,6 +1,19 @@
+# Ambientes Virtuais e Cache
 venv/
 __pycache__/
-.env
 *.pyc
-instance/
 .pytest_cache/
+
+# Variáveis de Ambiente e Segredos (IMPORTANTE)
+.env
+
+# Pasta de Instância do Flask (Banco de dados local geralmente fica aqui)
+instance/
+
+# --- UPLOADS E MÍDIA ---
+# Ignora todo o conteúdo da pasta uploads (fotos, documentos, etc)
+uploads/
+static/uploads/
+
+# (Opcional) Se quiser manter a pasta uploads vazia no git mas sem os arquivos:
+!uploads/.gitkeep

@@ -5,51 +5,158 @@
         <div class="overflow-y-auto p-6 md:p-8 custom-scrollbar">
             <div id="etapa1">
                 <h2 class="text-2xl font-bold text-green-800 mb-6 border-b pb-4">1. Detalhes Técnicos</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="col-span-2"><label class="text-xs font-bold text-gray-500 uppercase">Título</label><input id="f_titulo" type="text" class="w-full border-2 p-3 rounded-lg focus:border-green-600 outline-none"></div>
-                    <div><label class="text-xs font-bold text-gray-500 uppercase">Operação</label><select id="f_operacao" class="w-full border-2 p-3 rounded-lg bg-white"><option>Venda</option><option>Aluguel</option></select></div>
-                    <div><label class="text-xs font-bold text-gray-500 uppercase">País</label><input id="f_pais" type="text" value="Brasil" class="w-full border-2 p-3 rounded-lg"></div>
-                    <div><label class="text-xs font-bold text-gray-500 uppercase">Cidade/UF</label><input id="f_cidade_estado" type="text" class="w-full border-2 p-3 rounded-lg"></div>
-                    <div><label class="text-xs font-bold text-gray-500 uppercase">Preço/Ha</label><input id="f_preco_hectare" type="number" class="w-full border-2 p-3 rounded-lg"></div>
-                    <div><label class="text-xs font-bold text-gray-500 uppercase">Área Total</label><input id="f_area" type="number" class="w-full border-2 p-3 rounded-lg"></div>
-                    <div><label class="text-xs font-bold text-gray-500 uppercase">Aptidão</label><input id="f_aptidao" type="text" class="w-full border-2 p-3 rounded-lg"></div>
-                    <div><label class="text-xs font-bold text-gray-500 uppercase">Serviços</label><input id="f_servicos" type="text" class="w-full border-2 p-3 rounded-lg"></div>
-                    <div><label class="text-xs font-bold text-gray-500 uppercase">Vendedor</label><input id="f_vendedor" type="text" value="Imobiliária" class="w-full border-2 p-3 rounded-lg"></div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-3">
+                        <label class="text-xs font-bold text-gray-500 uppercase">Título do Anúncio</label>
+                        <input id="f_titulo" type="text" class="w-full border-2 p-3 rounded-lg focus:border-green-600 outline-none placeholder-gray-300" placeholder="Ex: Casa com Piscina ou Fazenda 500ha">
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Operação</label>
+                        <select id="f_operacao" class="w-full border-2 p-3 rounded-lg bg-white outline-none focus:border-green-600">
+                            <option value="Venda">Venda</option>
+                            <option value="Aluguel">Aluguel</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Tipo</label>
+                        <div class="flex gap-1">
+                            <select id="f_tipo" class="w-full border-2 p-3 rounded-lg bg-white outline-none focus:border-green-600">
+                                <option value="">Selecione...</option>
+                                <option value="Casa">Casa</option>
+                                <option value="Terreno">Terreno</option>
+                                <option value="Sítio">Sítio</option>
+                                <option value="Fazenda">Fazenda</option>
+                                <option value="Quiosque">Quiosque</option>
+                                <option value="Comercial">Comercial</option>
+                            </select>
+                            <button onclick="novaOpcao('tipo', 'f_tipo')" class="bg-green-100 text-green-700 px-3 rounded-lg font-bold hover:bg-green-200 border border-green-200" title="Adicionar Novo">+</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Unidade Medida</label>
+                        <select id="f_medida" class="w-full border-2 p-3 rounded-lg bg-white outline-none focus:border-green-600">
+                            <option value="m²">Metros (m²)</option>
+                            <option value="Ha">Hectares (Ha)</option>
+                            <option value="Alqueires">Alqueires</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Preço Total (R$)</label>
+                        <input id="f_preco_hectare" type="number" step="0.01" class="w-full border-2 p-3 rounded-lg outline-none focus:border-green-600">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Área Total</label>
+                        <input id="f_area" type="number" step="0.01" class="w-full border-2 p-3 rounded-lg outline-none focus:border-green-600">
+                    </div>
+                    
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">País</label>
+                        <div class="flex gap-1">
+                            <select id="f_pais" class="w-full border-2 p-3 rounded-lg bg-white outline-none focus:border-green-600"></select>
+                            <button onclick="novaOpcao('pais', 'f_pais')" class="bg-green-100 text-green-700 px-3 rounded-lg font-bold hover:bg-green-200 border border-green-200" title="Adicionar Novo">+</button>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="text-xs font-bold text-gray-500 uppercase">Cidade / Estado</label>
+                        <div class="flex gap-1">
+                            <select id="f_cidade_estado" class="w-full border-2 p-3 rounded-lg bg-white outline-none focus:border-green-600"></select>
+                            <button onclick="novaOpcao('cidade', 'f_cidade_estado')" class="bg-green-100 text-green-700 px-3 rounded-lg font-bold hover:bg-green-200 border border-green-200" title="Adicionar Nova">+</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Aptidão (Uso Principal)</label>
+                        <div class="flex gap-1">
+                            <select id="f_aptidao" class="w-full border-2 p-3 rounded-lg bg-white outline-none focus:border-green-600"></select>
+                            <button onclick="novaOpcao('aptidao', 'f_aptidao')" class="bg-green-100 text-green-700 px-3 rounded-lg font-bold hover:bg-green-200 border border-green-200" title="Adicionar Novo">+</button>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="text-xs font-bold text-gray-500 uppercase">Serviços Próximos</label>
+                        <div class="flex gap-1">
+                            <select id="f_servicos" class="w-full border-2 p-3 rounded-lg bg-white outline-none focus:border-green-600"></select>
+                            <button onclick="novaOpcao('servicos', 'f_servicos')" class="bg-green-100 text-green-700 px-3 rounded-lg font-bold hover:bg-green-200 border border-green-200" title="Adicionar Novo">+</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Vendedor (CRM)</label>
+                        <div class="flex gap-1">
+                            <select id="f_vendedor" class="w-full border-2 p-3 rounded-lg bg-white outline-none focus:border-green-600"></select>
+                            <button onclick="novaOpcao('vendedor', 'f_vendedor')" class="bg-green-100 text-green-700 px-3 rounded-lg font-bold hover:bg-green-200 border border-green-200" title="Adicionar Novo">+</button>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="mt-8 flex justify-end gap-4 border-t pt-6">
-                    <button onclick="fecharModal()" class="px-6 py-2 text-gray-500 font-bold hover:bg-gray-100 rounded-lg">Cancelar</button>
-                    <button onclick="proximaEtapa()" class="bg-green-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-green-800">Próxima Etapa →</button>
+                    <button onclick="fecharModal()" class="px-6 py-2 text-gray-500 font-bold hover:bg-gray-100 rounded-lg transition">Cancelar</button>
+                    <button onclick="proximaEtapa()" class="bg-green-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-green-800 transition transform hover:scale-105">Próxima Etapa →</button>
                 </div>
             </div>
 
             <div id="etapa2" class="hidden">
-                <h2 class="text-2xl font-bold text-green-800 mb-6 border-b pb-4">2. Memorial & IA</h2>
-                <div class="space-y-4">
-                    <div><label class="text-xs font-bold text-gray-500 uppercase">Descrição</label><textarea id="f_desc" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500"></textarea></div>
-                    <div><label class="text-xs font-bold text-gray-500 uppercase">Solo</label><textarea id="f_solo" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500"></textarea></div>
-                    <div><label class="text-xs font-bold text-gray-500 uppercase">Hídrico</label><textarea id="f_hidrico" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500"></textarea></div>
-                    <div><label class="text-xs font-bold text-gray-500 uppercase">Infra</label><textarea id="f_infra" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500"></textarea></div>
-                    <div><label class="text-xs font-bold text-gray-500 uppercase">Logística</label><textarea id="f_log" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500"></textarea></div>
-                    <div><label class="text-xs font-bold text-gray-500 uppercase">Doc/Valor</label><textarea id="f_doc" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500"></textarea></div>
+                <h2 class="text-2xl font-bold text-green-800 mb-6 border-b pb-4">2. Detalhes & Mídia</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="text-xs font-bold text-gray-500 uppercase">Descrição Principal</label>
+                        <textarea id="f_desc" class="w-full border-2 p-3 rounded-lg h-24 outline-none focus:border-blue-500 transition" placeholder="Descreva os pontos fortes do imóvel..."></textarea>
+                    </div>
                     
-                    <div class="bg-blue-50 p-4 rounded-xl border-2 border-dashed border-blue-200 flex flex-col gap-2">
-                        <label class="text-xs font-bold text-blue-700 uppercase">Imagem Capa</label>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Características do Terreno</label>
+                        <textarea id="f_solo" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500" placeholder="Ex: Plano, gramado, terra fértil, murado..."></textarea>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Água e Lazer</label>
+                        <textarea id="f_hidrico" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500" placeholder="Ex: Piscina, Rio nos fundos, Poço artesiano..."></textarea>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Edificações e Benfeitorias</label>
+                        <textarea id="f_infra" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500" placeholder="Ex: Casa sede, área gourmet, galpão, cerca elétrica..."></textarea>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Acesso e Localização</label>
+                        <textarea id="f_log" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500" placeholder="Ex: 5km do centro, asfalto na porta, condomínio fechado..."></textarea>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="text-xs font-bold text-gray-500 uppercase">Documentação e Condições</label>
+                        <textarea id="f_doc" class="w-full border-2 p-3 rounded-lg h-20 outline-none focus:border-blue-500" placeholder="Ex: Escriturado, Aceita Financiamento..."></textarea>
+                    </div>
+                    
+                    <div class="md:col-span-2 bg-blue-50 p-4 rounded-xl border-2 border-dashed border-blue-200 flex flex-col gap-2 mt-2">
+                        <label class="text-xs font-bold text-blue-700 uppercase flex justify-between">
+                            <span>Galeria de Imagens</span>
+                            <span class="text-blue-400 font-normal">Múltiplos arquivos permitidos</span>
+                        </label>
                         <div class="flex gap-2">
-                            <input id="f_foto" type="text" class="flex-1 p-3 rounded-lg border outline-none text-gray-600 bg-white" placeholder="Selecione uma foto..." readonly>
-                            
-                            <input type="file" id="inputArquivoEscondido" class="hidden" accept="image/*" onchange="fazerUploadImagem()">
-                            
-                            <button onclick="document.getElementById('inputArquivoEscondido').click()" class="bg-blue-600 text-white px-4 rounded-lg font-bold hover:bg-blue-700 transition flex items-center gap-2">
-                                📂 Selecionar Foto
+                            <input id="f_foto" type="text" class="flex-1 p-3 rounded-lg border outline-none text-gray-600 bg-white" placeholder="Nenhuma foto selecionada..." readonly>
+                            <input type="file" id="inputArquivoEscondido" class="hidden" accept="image/*" multiple onchange="fazerUploadImagem()">
+                            <button id="btnUploadTrigger" onclick="document.getElementById('inputArquivoEscondido').click()" class="bg-blue-600 text-white px-6 rounded-lg font-bold hover:bg-blue-700 transition flex items-center gap-2 shadow-md">
+                                📂 Escolher Fotos
                             </button>
                         </div>
+                        <div id="listaFotosUpload" class="flex flex-col gap-1 mt-2 max-h-40 overflow-y-auto custom-scrollbar"></div>
                     </div>
+                </div>
+
                 <div class="mt-8 flex flex-col gap-3 pt-4 border-t">
-                    <button onclick="melhorarComIA()" id="btnIA" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-xl font-bold shadow-lg hover:scale-[1.01] transition">✨ IA Refinar Tudo</button>
+                    <button onclick="melhorarComIA()" id="btnIA" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-xl font-bold shadow-lg hover:scale-[1.01] transition flex items-center justify-center gap-2">
+                        ✨ Usar IA para Refinar Textos
+                    </button>
+                    
                     <div class="flex gap-3 mt-2">
-                        <button onclick="voltarEtapa()" class="flex-1 bg-white border-2 py-3 rounded-xl font-bold text-gray-600">Voltar</button>
-                        <button onclick="limparFormulario()" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold">Limpar</button>
-                        <button onclick="salvarTudo()" class="flex-[2] bg-green-700 text-white py-3 rounded-xl font-bold shadow-lg">Salvar</button>
+                        <button onclick="voltarEtapa()" class="flex-1 bg-white border-2 border-gray-300 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition">← Voltar</button>
+                        <button onclick="limparFormulario()" class="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold hover:bg-red-100 transition">Limpar</button>
+                        <button onclick="salvarTudo()" class="flex-[2] bg-green-700 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-green-800 transition transform hover:scale-[1.02]">💾 Salvar Imóvel</button>
                     </div>
                 </div>
             </div>

@@ -1,28 +1,45 @@
-<nav class="bg-green-900 text-white p-4 shadow-lg sticky top-0 z-40">
+<nav class="bg-theme-navbar text-white p-4 shadow-lg sticky top-0 z-40">
     <div class="container mx-auto flex justify-between items-center">
-        <h1 class="text-2xl font-bold italic flex items-center gap-2">
-            <span class="text-3xl">🌾</span> AgroVendas
-        </h1>
+        <a href="/" class="text-2xl font-bold italic flex items-center gap-2 hover:opacity-90 transition">
+            {% if config.url_logo %}
+                <img src="{{ config.url_logo }}" class="w-10 h-10 object-contain rounded-md bg-white/10 p-1">
+            {% else %}
+                <span class="text-3xl">🌾</span>
+            {% endif %}
+            <span>{{ config.nome_site }}</span>
+        </a>
         
         <div class="flex items-center gap-4 relative">
-            <span id="labelUsuario" class="text-sm font-bold opacity-90 hidden md:block">Visitante</span>
             
-            <button onclick="gerenciarCliqueAvatar()" class="w-10 h-10 bg-green-700 hover:bg-green-600 rounded-full flex items-center justify-center font-bold border-2 border-green-500 shadow-md cursor-pointer transition">
-                A
+            <button id="btnEntrarNav" onclick="document.getElementById('telaLogin').classList.remove('hidden')" class="bg-white text-green-900 px-6 py-2 rounded-full font-bold shadow-md hover:bg-gray-100 transition transform hover:scale-105">
+                Entrar
             </button>
 
-            <div id="menuUsuarioDropdown" class="hidden absolute right-0 top-12 w-48 bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100 z-50">
-                <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
-                    <p class="text-xs text-gray-500 uppercase font-bold">Conta</p>
-                    <p id="emailNoMenu" class="text-sm text-gray-800 font-bold truncate">...</p>
+            <div id="areaUsuarioLogado" class="hidden flex items-center gap-4">
+                <span id="labelUsuario" class="text-sm font-bold opacity-90 hidden md:block">Olá, Corretor</span>
+                
+                <button onclick="gerenciarCliqueAvatar()" class="w-10 h-10 bg-theme-destaque text-white rounded-full flex items-center justify-center shadow-md cursor-pointer transition hover:scale-110 relative z-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                </button>
+
+                <div id="menuUsuarioDropdown" class="hidden absolute right-0 top-12 w-56 bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100 z-40">
+                    <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
+                        <p class="text-xs text-gray-500 uppercase font-bold">Conta Logada</p>
+                        <p id="emailNoMenu" class="text-sm text-gray-800 font-bold truncate">...</p>
+                    </div>
+
+                    <a href="#" onclick="document.getElementById('modalConfig').classList.remove('hidden'); document.getElementById('menuUsuarioDropdown').classList.add('hidden');" class="block px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-green-700 transition flex items-center gap-2 border-b border-gray-50">
+                        ⚙️ Configurar Site
+                    </a>
+
+                    <a href="#" onclick="sairDoSistema()" class="block px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition flex items-center gap-2 font-bold">
+                        🚪 Sair
+                    </a>
                 </div>
-                <a href="#" onclick="alert('Funcionalidade em breve')" class="block px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-green-700 transition flex items-center gap-2">
-                    👤 Meu Perfil
-                </a>
-                <a href="#" onclick="sairDoSistema()" class="block px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition flex items-center gap-2 font-bold border-t border-gray-100">
-                    🚪 Sair
-                </a>
             </div>
+
         </div>
     </div>
 </nav>

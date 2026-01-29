@@ -128,7 +128,7 @@
     }
 
     function ordenarCardsPorFavorito() {
-        const container = document.querySelector('.grid'); 
+        const container = document.getElementById('gridImoveis');; 
         if(!container) return;
 
         const cards = Array.from(document.querySelectorAll('.imovel-card'));
@@ -503,13 +503,36 @@
     async function salvarConfiguracao() {
         const nome = document.getElementById('conf_nome').value;
         const url = document.getElementById('conf_url_logo').value;
+        const telefone = document.getElementById('conf_telefone').value; // NOVO CAMPO
+        
         if(!nome) return alert("O nome do site é obrigatório.");
+
+        const btn = document.querySelector('button[onclick="salvarConfiguracao()"]');
+        const textoOriginal = btn.innerText;
+        btn.innerText = "💾 Salvando...";
+        btn.disabled = true;
+
         try {
             const res = await fetch('/api/config/salvar', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ nome_site: nome, url_logo: url })
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                // Envia o telefone também
+                body: JSON.stringify({ nome_site: nome, url_logo: url, telefone: telefone })
             });
-            if(await res.json().status === 'sucesso') { alert("Salvo!"); location.reload(); } 
-            else { alert("Erro ao salvar"); }
-        } catch(e) { alert("Erro de conexão."); }
+            
+            const json = await res.json();
+            
+            if(json.status === 'sucesso') {
+                alert("Configuração salva com sucesso!");
+                location.reload();
+            } else {
+                alert("Erro ao salvar: " + (json.detalhe || "Erro desconhecido"));
+            }
+        } catch(e) { 
+            console.error(e);
+            alert("Erro de conexão."); 
+        } finally {
+            btn.innerText = textoOriginal;
+            btn.disabled = false;
+        }
     }

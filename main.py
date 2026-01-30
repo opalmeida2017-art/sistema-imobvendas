@@ -13,19 +13,21 @@ from werkzeug.utils import secure_filename
 # Carrega variáveis de ambiente
 load_dotenv()
 
+
 app = Flask(__name__)
 
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# --- CONFIGURAÇÃO DA IA (CORRIGIDA) ---
-api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
-    print("ALERTA: GEMINI_API_KEY não encontrada")
+# --- CONFIGURAÇÃO DA IA ---
+# Tenta pegar a chave com o nome padrão do Google
+api_key_google = os.getenv("GOOGLE_API_KEY")
 
-# Configura a chave globalmente
-genai.configure(api_key=api_key)
+if api_key_google:
+    genai.configure(api_key=api_key_google)
+else:
+    print("ALERTA: A variável GOOGLE_API_KEY não foi encontrada.")
 
 # --- CONFIGURAÇÃO DO BANCO DE DADOS ---
 def get_db_connection():

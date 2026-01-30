@@ -523,37 +523,6 @@ def upload_logo():
     url_publica = f"/static/uploads/{nome_arquivo}"
     return jsonify({"url": url_publica})
 
-# ==========================================
-# ÁREA DE CORREÇÃO DE LOGIN E SEGURANÇA
-# ==========================================
-
-from werkzeug.security import generate_password_hash, check_password_hash
-
-# 1. ROTA DE EMERGÊNCIA (Rode isso no navegador para resetar a senha)
-@app.route('/criar-admin-forca')
-def criar_admin_forca():
-    email = "edson.fazendasmt@gmail.com" # SEU EMAIL
-    senha_plana = "admin123"             # SUA SENHA
-    
-    # Gera a criptografia correta
-    senha_criptografada = generate_password_hash(senha_plana)
-    
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        
-        # Remove usuário antigo se existir (para limpar erros)
-        cur.execute("DELETE FROM usuarios WHERE email = %s", (email,))
-        
-        # Cria novo usuário limpo
-        cur.execute("INSERT INTO usuarios (email, senha_hash) VALUES (%s, %s)", (email, senha_criptografada))
-        
-        conn.commit()
-        conn.close()
-        return jsonify({"status": "sucesso", "mensagem": f"Usuário {email} criado/resetado com a senha: {senha_plana}"})
-    except Exception as e:
-        return jsonify({"erro": str(e)})
-
 # 2. ROTA DE LOGIN OFICIAL (Substitui a lógica antiga)
 @app.route('/api/login', methods=['POST'])
 def api_login_corrigido():
@@ -579,8 +548,6 @@ def api_login_corrigido():
 
     except Exception as e:
         return jsonify({"success": False, "message": f"Erro: {str(e)}"})
-
-# ==========================================
 
 setup_database() 
 

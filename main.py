@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import google.generativeai as genai
 from decimal import Decimal
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Carrega variáveis de ambiente
 load_dotenv()

@@ -510,7 +510,6 @@ def criar_admin_forca():
     # Dados do Usuário
     email = "edson.fazendasmt@gmail.com"
     senha_plana = "admin123"
-    nome = "Edson Admin"
     
     # 1. Gera a Criptografia correta (Hash)
     from werkzeug.security import generate_password_hash
@@ -520,14 +519,14 @@ def criar_admin_forca():
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # 2. Verifica se já existe e remove para recriar (Garante que a senha nova funcione)
+        # 2. Verifica se já existe e remove para recriar
         cur.execute("DELETE FROM usuarios WHERE email = %s", (email,))
         
-        # 3. Insere o novo usuário
+        # 3. Insere o novo usuário (AGORA SEM O CAMPO 'NOME')
         cur.execute("""
-            INSERT INTO usuarios (email, nome, senha_hash) 
-            VALUES (%s, %s, %s)
-        """, (email, nome, senha_criptografada))
+            INSERT INTO usuarios (email, senha_hash) 
+            VALUES (%s, %s)
+        """, (email, senha_criptografada))
         
         conn.commit()
         conn.close()

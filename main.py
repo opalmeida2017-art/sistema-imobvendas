@@ -503,37 +503,65 @@ def upload_logo():
     url_publica = f"/static/uploads/{nome_arquivo}"
     return jsonify({"url": url_publica})
 
+# ==========================================
+# ÁREA DE CORREÇÃO DE LOGIN E SEGURANÇA
+# ==========================================
 
-# --- ROTA DE EMERGÊNCIA PARA CRIAR ADMIN ---
+from werkzeug.security import generate_password_hash, check_password_hash
+
+# 1. ROTA DE EMERGÊNCIA (Rode isso no navegador para resetar a senha)
 @app.route('/criar-admin-forca')
 def criar_admin_forca():
-    # Dados do Usuário
-    email = "edson.fazendasmt@gmail.com"
-    senha_plana = "admin123"
+    email = "edson.fazendasmt@gmail.com" # SEU EMAIL
+    senha_plana = "admin123"             # SUA SENHA
     
-    # 1. Gera a Criptografia correta (Hash)
-    from werkzeug.security import generate_password_hash
+    # Gera a criptografia correta
     senha_criptografada = generate_password_hash(senha_plana)
     
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # 2. Verifica se já existe e remove para recriar
+        # Remove usuário antigo se existir (para limpar erros)
         cur.execute("DELETE FROM usuarios WHERE email = %s", (email,))
         
-        # 3. Insere o novo usuário (AGORA SEM O CAMPO 'NOME')
-        cur.execute("""
-            INSERT INTO usuarios (email, senha_hash) 
-            VALUES (%s, %s)
-        """, (email, senha_criptografada))
+        # Cria novo usuário limpo
+        cur.execute("INSERT INTO usuarios (email, senha_hash) VALUES (%s, %s)", (email, senha_criptografada))
         
         conn.commit()
         conn.close()
-        return jsonify({"status": "sucesso", "mensagem": f"Usuário {email} recriado com a senha: {senha_plana}"})
-        
+        return jsonify({"status": "sucesso", "mensagem": f"Usuário {email} criado/resetado com a senha: {senha_plana}"})
     except Exception as e:
         return jsonify({"erro": str(e)})
+
+# 2. ROTA DE LOGIN OFICIAL (Substitui a lógica antiga)
+@app.route('/api/login', methods=['POST'])
+def api_login_corrigido():
+    data = request.json
+    email = data.get('email', '').strip()
+    senha = data.get('senha', '')
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        # Busca a senha criptografada no banco
+        cur.execute("SELECT senha_hash FROM usuarios WHERE email = %s", (email,))
+        resultado = cur.fetchone()
+        conn.close()
+
+        if resultado:
+            senha_no_banco = resultado[0]
+            # Compara a senha digitada com a criptografia do banco
+            if check_password_hash(senha_no_banco, senha):
+                return jsonify({"success": True, "redirect": "/admin"})
+        
+        return jsonify({"success": False, "message": "E-mail ou senha incorretos"})
+
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Erro: {str(e)}"})
+
+# ==========================================
+
 setup_database() 
 
 

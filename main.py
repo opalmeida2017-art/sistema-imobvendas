@@ -154,18 +154,38 @@ def get_imovel(id):
         if 'conn' in locals(): conn.close()
 
 # --- AUTENTICAÇÃO ---
+# --- AUTENTICAÇÃO CORRIGIDA ---
 @app.route('/auth/login', methods=['POST'])
 def login_usuario():
     dados = request.json
+    email = dados.get('email', '').strip()
+    senha = dados.get('senha', '')
+    
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT email FROM usuarios WHERE email = %s AND senha_hash = %s", (dados.get('email'), hash_senha(dados.get('senha'))))
-        user = cur.fetchone()
-        if user: return jsonify({"status": "sucesso", "usuario": user[0]})
-        else: return jsonify({"status": "erro", "mensagem": "Incorreto"})
-    except Exception as e: return jsonify({"status": "erro", "mensagem": str(e)})
+        
+        # 1. Busca a senha criptografada (hash) que está no banco
+        cur.execute("SELECT senha_hash FROM usuarios WHERE email = %s", (email,))
+        resultado = cur.fetchone()
+        conn.close()
 
+        if resultado:
+            senha_no_banco = resultado[0]
+            
+            # 2. Importa a ferramenta de verificação
+            from werkzeug.security import check_password_hash
+            
+            # 3. Compara: Se a senha digitada bater com a criptografia, libera o acesso
+            if check_password_hash(senha_no_banco, senha):
+                return jsonify({"status": "sucesso", "usuario": email})
+        
+        # Se não achou ou a senha não bateu
+        return jsonify({"status": "erro", "mensagem": "E-mail ou senha incorretos"})
+
+    except Exception as e:
+        return jsonify({"status": "erro", "mensagem": f"Erro interno: {str(e)}"})
+    
 # --- ROTA HOME ---
 @app.route('/')
 def home():

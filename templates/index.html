@@ -43,7 +43,11 @@
     {% if imoveis %}
     <div id="gridImoveis" class="grid grid-cols-1 md:grid-cols-3 gap-8 pb-12">
         {% for imovel in imoveis %}
-        <div id="card-{{ imovel.id }}" class="imovel-card bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-200 group flex flex-col h-full relative" data-galeria='{{ imovel.galeria | tojson }}'>
+        
+        <div id="card-{{ imovel.id }}" 
+             class="imovel-card bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-200 group flex flex-col h-full relative {{ 'status-vendido' if imovel.status == 'vendido' else 'status-disponivel' }}" 
+             data-id="{{ imovel.id }}"
+             data-galeria='{{ imovel.galeria | tojson }}'>
             
             <div class="relative h-64 overflow-hidden bg-gray-100 group-img">
                 <img id="img-{{ imovel.id }}" src="{{ imovel.galeria[0] }}" data-index="0"
@@ -54,6 +58,7 @@
                     {{ imovel.tipo }}
                 </div>
 
+                {% if imovel.status != 'vendido' %}
                 <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30">
                     
                     <a href="https://wa.me/{{ config.telefone }}?text=Olá, tenho interesse no imóvel ID {{ imovel.id }}: {{ imovel.titulo }}" target="_blank" class="bg-white text-green-500 p-2 rounded-full shadow-lg hover:bg-green-500 hover:text-white hover:scale-110 transition flex items-center justify-center" title="Conversar no WhatsApp">
@@ -64,10 +69,13 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                     </button>
                     
-                    <button onclick="favoritarImovel({{ imovel.id }}, this)" class="btn-favorito bg-white text-gray-400 p-2 rounded-full shadow-lg hover:text-red-500 hover:scale-110 transition flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                    <button onclick="favoritarImovel({{ imovel.id }}, this)" class="btn-favorito bg-white p-2 rounded-full hover:bg-red-50 text-gray-400 shadow-md transition-colors group">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
                     </button>
                 </div>
+                {% endif %}
 
                 <div class="absolute inset-0 flex items-center justify-between px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 pointer-events-none">
                     <button onclick="mudarFoto(event, {{ imovel.id }}, -1)" class="pointer-events-auto bg-black/50 hover:bg-black/80 text-white p-2 rounded-full backdrop-blur-sm transition transform hover:scale-110">
@@ -140,31 +148,112 @@
     </div>
 
     <script>
-        function mudarFoto(event, id, direcao) {
-            // Impede que o clique na seta abra o link do imóvel
-            event.preventDefault();
-            event.stopPropagation();
+        // 1. OBTÉM DADOS LIMPOS
+        function getFavoritos() {
+            const salvos = JSON.parse(localStorage.getItem('favoritosAgro') || '[]');
+            // Força tudo a ser número para evitar duplicatas "10" vs 10
+            return [...new Set(salvos.map(id => parseInt(id)).filter(id => !isNaN(id)))];
+        }
+
+        // 2. SALVA
+        function salvarFavoritos(lista) {
+            localStorage.setItem('favoritosAgro', JSON.stringify(lista));
+        }
+
+        // 3. ATUALIZA A INTERFACE INTEIRA (Fonte da Verdade)
+        // Essa função garante que o visual SEMPRE bata com o dado salvo
+        function atualizarBotoes() {
+            const favoritos = getFavoritos();
             
+            // Pega TODOS os botões de coração da tela
+            const todosBotoes = document.querySelectorAll('.btn-favorito');
+            
+            todosBotoes.forEach(btn => {
+                // Pega o ID do botão (extraído do id="btn-fav-10")
+                const idImovel = parseInt(btn.id.replace('btn-fav-', ''));
+                
+                if (favoritos.includes(idImovel)) {
+                    // SE É FAVORITO: Pinta de Vermelho
+                    btn.classList.add('text-red-500');
+                    btn.classList.remove('text-gray-400');
+                } else {
+                    // SE NÃO É: Pinta de Cinza
+                    btn.classList.remove('text-red-500');
+                    btn.classList.add('text-gray-400');
+                }
+            });
+        }
+
+        // 4. AÇÃO DO CLIQUE
+        function toggleFavorito(id) {
+            const idNumerico = parseInt(id);
+            let favoritos = getFavoritos();
+            
+            // Lógica "Nuclear": Filtra para remover (mais seguro que splice)
+            const novaLista = favoritos.filter(fId => fId !== idNumerico);
+            
+            if (novaLista.length < favoritos.length) {
+                // Se o tamanho diminuiu, é porque REMOVEU
+                favoritos = novaLista;
+            } else {
+                // Se o tamanho é igual, não tinha, então ADICIONA
+                favoritos.push(idNumerico);
+            }
+
+            salvarFavoritos(favoritos);
+            
+            // Atualiza visual e ordena
+            atualizarBotoes(); 
+            setTimeout(reordenarGrid, 100); // Pequeno delay para garantir fluidez
+        }
+
+        // 5. REORDENAÇÃO
+        function reordenarGrid() {
+            const grid = document.getElementById('gridImoveis');
+            if(!grid) return;
+
+            const favoritos = getFavoritos();
+            const cards = Array.from(grid.children);
+
+            cards.sort((a, b) => {
+                const idA = parseInt(a.dataset.id);
+                const idB = parseInt(b.dataset.id);
+                
+                const isFavA = favoritos.includes(idA);
+                const isFavB = favoritos.includes(idB);
+                
+                const isVendidoA = a.classList.contains('status-vendido');
+                const isVendidoB = b.classList.contains('status-vendido');
+
+                if (isVendidoA && !isVendidoB) return 1;
+                if (!isVendidoA && isVendidoB) return -1;
+                if (isFavA && !isFavB) return -1;
+                if (!isFavA && isFavB) return 1;
+                return idB - idA; 
+            });
+
+            cards.forEach(card => grid.appendChild(card));
+        }
+
+        // 6. FUNÇÕES DE FOTO
+        function mudarFoto(event, id, direcao) {
+            event.preventDefault(); event.stopPropagation();
             const card = document.getElementById('card-' + id);
             const img = document.getElementById('img-' + id);
-            
-            // Pega a lista de fotos salva no atributo do card
             const galeria = JSON.parse(card.dataset.galeria);
-            
-            // Descobre qual foto está mostrando agora
             let indexAtual = parseInt(img.dataset.index);
-            
-            // Calcula a próxima foto
             let novoIndex = indexAtual + direcao;
-            
-            // Loop Infinito (Se passar do fim, volta pro começo)
             if (novoIndex >= galeria.length) novoIndex = 0;
             if (novoIndex < 0) novoIndex = galeria.length - 1;
-            
-            // Atualiza a imagem e o índice
             img.src = galeria[novoIndex];
             img.dataset.index = novoIndex;
         }
+
+        // 7. INICIALIZAÇÃO
+        document.addEventListener('DOMContentLoaded', () => {
+            atualizarBotoes(); // Pinta correto ao abrir
+            reordenarGrid();   // Ordena correto ao abrir
+        });
     </script>
 </div>
 {% endblock %}

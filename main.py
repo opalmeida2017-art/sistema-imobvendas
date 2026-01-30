@@ -503,22 +503,38 @@ def upload_logo():
     url_publica = f"/static/uploads/{nome_arquivo}"
     return jsonify({"url": url_publica})
 
-@app.route('/debug/caminho')
-def debug_caminho():
-    import os
-    diretorio_atual = os.getcwd()
+
+# --- ROTA DE EMERGÊNCIA PARA CRIAR ADMIN ---
+@app.route('/criar-admin-forca')
+def criar_admin_forca():
+    # Dados do Usuário
+    email = "edson.fazendasmt@gmail.com"
+    senha_plana = "admin123"
+    nome = "Edson Admin"
+    
+    # 1. Gera a Criptografia correta (Hash)
+    from werkzeug.security import generate_password_hash
+    senha_criptografada = generate_password_hash(senha_plana)
     
     try:
-        arquivos = os.listdir(os.path.join(diretorio_atual, 'static', 'uploads'))
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # 2. Verifica se já existe e remove para recriar (Garante que a senha nova funcione)
+        cur.execute("DELETE FROM usuarios WHERE email = %s", (email,))
+        
+        # 3. Insere o novo usuário
+        cur.execute("""
+            INSERT INTO usuarios (email, nome, senha_hash) 
+            VALUES (%s, %s, %s)
+        """, (email, nome, senha_criptografada))
+        
+        conn.commit()
+        conn.close()
+        return jsonify({"status": "sucesso", "mensagem": f"Usuário {email} recriado com a senha: {senha_plana}"})
+        
     except Exception as e:
-        arquivos = str(e)
-
-    return jsonify({
-        "Onde_o_Python_esta_rodando": diretorio_atual,
-        "Onde_o_disco_deveria_estar": os.path.join(diretorio_atual, 'static', 'uploads'),
-        "Arquivos_encontrados_agora": arquivos
-    })
-
+        return jsonify({"erro": str(e)})
 setup_database() 
 
 

@@ -503,7 +503,24 @@ def upload_logo():
     url_publica = f"/static/uploads/{nome_arquivo}"
     return jsonify({"url": url_publica})
 
+@app.route('/debug/caminho')
+def debug_caminho():
+    import os
+    diretorio_atual = os.getcwd()
+    
+    try:
+        arquivos = os.listdir(os.path.join(diretorio_atual, 'static', 'uploads'))
+    except Exception as e:
+        arquivos = str(e)
+
+    return jsonify({
+        "Onde_o_Python_esta_rodando": diretorio_atual,
+        "Onde_o_disco_deveria_estar": os.path.join(diretorio_atual, 'static', 'uploads'),
+        "Arquivos_encontrados_agora": arquivos
+    })
+
 setup_database() 
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
